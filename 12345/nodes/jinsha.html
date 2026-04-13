@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>巧渡金沙江 - 长征纪念</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- GSAP 动画库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* 节点详情页特定样式 */
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 2px;
+      background-color: #dc2626;
+    }
+    
+    .timeline-item::after {
+      content: '';
+      position: absolute;
+      left: -4px;
+      top: 24px;
+      height: 10px;
+      width: 10px;
+      border-radius: 50%;
+      background-color: #dc2626;
+    }
+    
+    .audio-player {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      width: 90%;
+      max-width: 500px;
+    }
+    
+    @media (max-width: 768px) {
+      .timeline-item::before,
+      .timeline-item::after {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white">
+  <!-- 导航栏 -->
+  <nav class="bg-gray-900/80 backdrop-blur-md fixed w-full z-50 border-b border-gray-800">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="../index.html" class="flex items-center space-x-2">
+        <i class="fas fa-flag text-red-600 text-2xl"></i>
+        <span class="text-xl font-bold">长征纪念</span>
+      </a>
+      <div class="hidden md:flex space-x-6">
+        <a href="../index.html" class="hover:text-red-500 transition-colors">首页</a>
+        <a href="../pages/map.html" class="hover:text-red-500 transition-colors">长征地图</a>
+        <a href="../pages/data.html" class="hover:text-red-500 transition-colors">数据可视化</a>
+        <a href="../pages/settings.html" class="hover:text-red-500 transition-colors">设置</a>
+      </div>
+      <button id="mobile-menu-btn" class="md:hidden text-white">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+    </div>
+    <!-- 移动端菜单 -->
+    <div id="mobile-menu" class="hidden md:hidden bg-gray-800">
+      <div class="container mx-auto px-4 py-2 flex flex-col space-y-2">
+        <a href="../index.html" class="py-2 hover:text-red-500 transition-colors">首页</a>
+        <a href="../pages/map.html" class="py-2 hover:text-red-500 transition-colors">长征地图</a>
+        <a href="../pages/data.html" class="py-2 hover:text-red-500 transition-colors">数据可视化</a>
+        <a href="../pages/settings.html" class="py-2 hover:text-red-500 transition-colors">设置</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主要内容 -->
+  <main class="pt-20 pb-24">
+    <!-- 英雄史诗大标题 -->
+    <div class="relative h-[50vh] flex items-center justify-center overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900 z-10"></div>
+      <img src="https://p11-doubao-search-sign.byteimg.com/labis/5958a21e8cc5762c4ef49c7bcb0240b2~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=n6eM%2BUfewwjLSElvVfYsEEQF%2BQY%3D" 
+           alt="巧渡金沙江" 
+           class="absolute inset-0 w-full h-full object-cover">
+      <div class="container mx-auto px-4 z-20 text-center">
+        <h1 class="text-5xl md:text-7xl font-bold mb-4 text-white drop-shadow-lg">巧渡金沙江</h1>
+        <p class="text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto">1935年5月，红军主力利用7只小船，在7天7夜间，全部渡过金沙江，摆脱了几十万国民党军的围追堵截</p>
+      </div>
+    </div>
+
+    <!-- 历史背景 -->
+    <section class="container mx-auto px-4 py-12">
+      <h2 class="text-3xl font-bold mb-8 text-center">历史背景</h2>
+      <div class="max-w-4xl mx-auto">
+        <p class="text-lg leading-relaxed mb-6">
+          1935年4月，中央红军四渡赤水后，乘虚直插云南，威胁昆明。国民党云南省政府主席龙云急调滇军回防昆明，削弱了金沙江防务。
+        </p>
+        <p class="text-lg leading-relaxed mb-6">
+          金沙江是长江上游的一段，江面宽阔，水流湍急。红军如果不能迅速渡江，就有被国民党军围歼的危险。
+        </p>
+        <p class="text-lg leading-relaxed">
+          毛泽东同志决定，红军迅速北上，抢占金沙江渡口，为红军主力渡江创造条件。
+        </p>
+      </div>
+    </section>
+
+    <!-- 时间线 -->
+    <section class="container mx-auto px-4 py-12 bg-gray-800/50">
+      <h2 class="text-3xl font-bold mb-8 text-center">事件时间线</h2>
+      <div class="max-w-4xl mx-auto relative pl-8 md:pl-12">
+        <div class="timeline-item relative pl-8 mb-12">
+          <h3 class="text-xl font-bold mb-2">1935年4月29日</h3>
+          <p class="text-lg">中央红军发布《关于我军速渡金沙江在川西建立苏区的指示》，决定迅速渡过金沙江。</p>
+        </div>
+        <div class="timeline-item relative pl-8 mb-12">
+          <h3 class="text-xl font-bold mb-2">1935年5月3日</h3>
+          <p class="text-lg">红军先遣队干部团在皎平渡偷渡金沙江成功，控制了渡口。</p>
+        </div>
+        <div class="timeline-item relative pl-8 mb-12">
+          <h3 class="text-xl font-bold mb-2">1935年5月3日至9日</h3>
+          <p class="text-lg">红军主力利用7只小船，在当地船工的帮助下，在7天7夜间，全部渡过金沙江。</p>
+        </div>
+        <div class="timeline-item relative pl-8">
+          <h3 class="text-xl font-bold mb-2">1935年5月10日</h3>
+          <p class="text-lg">国民党军赶到金沙江边时，红军早已远走高飞。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 照片展示 -->
+    <section class="container mx-auto px-4 py-12">
+      <h2 class="text-3xl font-bold mb-8 text-center">历史照片</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300">
+          <img src="https://p11-doubao-search-sign.byteimg.com/labis/5958a21e8cc5762c4ef49c7bcb0240b2~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=n6eM%2BUfewwjLSElvVfYsEEQF%2BQY%3D" 
+               alt="金沙江" 
+               class="w-full h-64 object-cover">
+          <div class="p-4">
+            <h3 class="font-bold mb-2">金沙江</h3>
+            <p class="text-gray-300">红军渡江的主要渡口之一</p>
+          </div>
+        </div>
+        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300">
+          <img src="https://p11-doubao-search-sign.byteimg.com/labis/5958a21e8cc5762c4ef49c7bcb0240b2~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=n6eM%2BUfewwjLSElvVfYsEEQF%2BQY%3D" 
+               alt="红军渡江" 
+               class="w-full h-64 object-cover">
+          <div class="p-4">
+            <h3 class="font-bold mb-2">红军渡江</h3>
+            <p class="text-gray-300">红军战士们正在渡江</p>
+          </div>
+        </div>
+        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg transform hover:scale-105 transition-transform duration-300">
+          <img src="https://p11-doubao-search-sign.byteimg.com/labis/5958a21e8cc5762c4ef49c7bcb0240b2~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=n6eM%2BUfewwjLSElvVfYsEEQF%2BQY%3D" 
+               alt="皎平渡" 
+               class="w-full h-64 object-cover">
+          <div class="p-4">
+            <h3 class="font-bold mb-2">皎平渡</h3>
+            <p class="text-gray-300">红军主力渡江的主要渡口</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 历史意义 -->
+    <section class="container mx-auto px-4 py-12 bg-gray-800/50">
+      <h2 class="text-3xl font-bold mb-8 text-center">历史意义</h2>
+      <div class="max-w-4xl mx-auto">
+        <p class="text-lg leading-relaxed mb-6">
+          巧渡金沙江是红军长征中具有决定意义的胜利。红军成功摆脱了几十万国民党军的围追堵截，取得了战略转移中具有决定意义的胜利。
+        </p>
+        <p class="text-lg leading-relaxed mb-6">
+          这一胜利充分体现了毛泽东同志等老一辈革命家的高超指挥艺术和红军战士的英勇无畏精神。
+        </p>
+        <p class="text-lg leading-relaxed">
+          巧渡金沙江的胜利，为红军继续北上，实现与红四方面军会师创造了有利条件。
+        </p>
+      </div>
+    </section>
+
+    <!-- 导航到下一个节点 -->
+    <section class="container mx-auto px-4 py-12 text-center">
+      <a href="dadu.html" class="inline-flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full font-bold text-lg transition-colors">
+        <span>下一站：强渡大渡河</span>
+        <i class="fas fa-arrow-right"></i>
+      </a>
+    </section>
+  </main>
+
+  <!-- 音频播放器 -->
+  <div class="audio-player bg-gray-800/90 backdrop-blur-md rounded-full shadow-2xl p-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <button id="play-audio" class="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center text-white">
+          <i class="fas fa-play"></i>
+        </button>
+        <div>
+          <h4 class="font-bold">巧渡金沙江解说</h4>
+          <p class="text-sm text-gray-400">点击播放音频解说</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+        <button id="volume-control" class="text-white">
+          <i class="fas fa-volume-up"></i>
+        </button>
+        <input type="range" id="volume-slider" min="0" max="100" value="50" class="w-24 accent-red-600">
+      </div>
+    </div>
+  </div>
+
+  <!-- 返回顶部按钮 -->
+  <button id="back-to-top" class="fixed bottom-24 right-6 w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg z-50 opacity-0 transition-opacity duration-300">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <script>
+    // 移动端菜单
+    document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // 返回顶部按钮
+    const backToTopBtn = document.getElementById('back-to-top');
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        backToTopBtn.style.opacity = '1';
+      } else {
+        backToTopBtn.style.opacity = '0';
+      }
+    });
+
+    backToTopBtn.addEventListener('click', function() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+
+    // 音频播放
+    let audio = null;
+    let isPlaying = false;
+
+    document.getElementById('play-audio').addEventListener('click', function() {
+      if (!audio) {
+        // 检查音频文件是否存在
+        fetch('../assets/audio/jinsha.mp3', { method: 'HEAD' })
+          .then(response => {
+            if (response.ok) {
+              audio = new Audio('../assets/audio/jinsha.mp3');
+              audio.volume = 0.5;
+              toggleAudio();
+            } else {
+              console.warn('音频文件不存在');
+              alert('音频文件未找到，请检查网络连接或稍后再试');
+            }
+          })
+          .catch(error => {
+            console.warn('音频文件加载失败:', error);
+            alert('音频文件加载失败，请检查网络连接或稍后再试');
+          });
+      } else {
+        toggleAudio();
+      }
+    });
+
+    function toggleAudio() {
+      const playBtn = document.getElementById('play-audio');
+      const icon = playBtn.querySelector('i');
+      
+      if (isPlaying) {
+        audio.pause();
+        icon.className = 'fas fa-play';
+        isPlaying = false;
+      } else {
+        audio.play().catch(error => {
+          console.warn('音频播放失败:', error);
+          alert('音频播放失败，请检查浏览器设置');
+        });
+        icon.className = 'fas fa-pause';
+        isPlaying = true;
+      }
+    }
+
+    // 音量控制
+    document.getElementById('volume-slider').addEventListener('input', function(e) {
+      if (audio) {
+        audio.volume = e.target.value / 100;
+      }
+    });
+
+    // 页面加载动画
+    document.addEventListener('DOMContentLoaded', function() {
+      gsap.from('h1', { opacity: 0, y: -50, duration: 1 });
+      gsap.from('p', { opacity: 0, y: 20, duration: 1, stagger: 0.2 });
+    });
+  </script>
+</body>
+</html>

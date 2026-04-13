@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>瑞金出发 - 长征纪念</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- GSAP 动画库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* 节点详情页面特定样式 */
+    .hero-section {
+      position: relative;
+      height: 70vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8));
+      z-index: 1;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      color: white;
+    }
+    
+    .hero-title {
+      font-size: 3rem md:4rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    
+    .hero-date {
+      font-size: 1.5rem;
+      color: #d4af37;
+      margin-bottom: 2rem;
+    }
+    
+    .timeline {
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 0;
+    }
+    
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 100%;
+      background-color: #dc2626;
+    }
+    
+    .timeline-item {
+      position: relative;
+      margin-bottom: 3rem;
+    }
+    
+    .timeline-item:nth-child(odd) {
+      padding-right: calc(50% + 2rem);
+      text-align: right;
+    }
+    
+    .timeline-item:nth-child(even) {
+      padding-left: calc(50% + 2rem);
+    }
+    
+    .timeline-content {
+      background-color: rgba(31, 41, 55, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+      padding: 1.5rem;
+      position: relative;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .timeline-item:nth-child(odd) .timeline-content::after {
+      content: '';
+      position: absolute;
+      top: 1.5rem;
+      right: -1rem;
+      width: 0;
+      height: 0;
+      border-top: 1rem solid transparent;
+      border-bottom: 1rem solid transparent;
+      border-left: 1rem solid rgba(31, 41, 55, 0.85);
+    }
+    
+    .timeline-item:nth-child(even) .timeline-content::after {
+      content: '';
+      position: absolute;
+      top: 1.5rem;
+      left: -1rem;
+      width: 0;
+      height: 0;
+      border-top: 1rem solid transparent;
+      border-bottom: 1rem solid transparent;
+      border-right: 1rem solid rgba(31, 41, 55, 0.85);
+    }
+    
+    .timeline-dot {
+      position: absolute;
+      top: 1.5rem;
+      width: 24px;
+      height: 24px;
+      background-color: #dc2626;
+      border-radius: 50%;
+      z-index: 10;
+    }
+    
+    .timeline-item:nth-child(odd) .timeline-dot {
+      right: calc(50% - 12px);
+    }
+    
+    .timeline-item:nth-child(even) .timeline-dot {
+      left: calc(50% - 12px);
+    }
+    
+    .timeline-date {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #d4af37;
+      margin-bottom: 0.5rem;
+    }
+    
+    .timeline-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      color: #ffffff;
+    }
+    
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      aspect-ratio: 16/9;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .gallery-item:hover {
+      transform: scale(1.05);
+    }
+    
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: all 0.3s ease;
+    }
+    
+    .gallery-item:hover img {
+      transform: scale(1.1);
+    }
+    
+    .gallery-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+      display: flex;
+      align-items: flex-end;
+      padding: 1rem;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    
+    .gallery-item:hover .gallery-overlay {
+      opacity: 1;
+    }
+    
+    .gallery-caption {
+      color: white;
+      font-size: 0.9rem;
+    }
+    
+    .quote-block {
+      background-color: rgba(220, 38, 38, 0.1);
+      border-left: 4px solid #dc2626;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      position: relative;
+    }
+    
+    .quote-block::before {
+      content: '\f10d';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      top: -1rem;
+      left: 1rem;
+      background-color: #dc2626;
+      color: white;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    
+    .quote-text {
+      font-size: 1.2rem;
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+    
+    .quote-author {
+      font-weight: bold;
+      color: #d4af37;
+    }
+    
+    .audio-player {
+      background-color: rgba(31, 41, 55, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    
+    .audio-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .audio-control-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #dc2626;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .audio-control-btn:hover {
+      background-color: #b91c1c;
+      transform: scale(1.1);
+    }
+    
+    .audio-progress {
+      flex: 1;
+      height: 4px;
+      background-color: #374151;
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .audio-progress-bar {
+      height: 100%;
+      background-color: #dc2626;
+      border-radius: 2px;
+      width: 0;
+      transition: width 0.1s linear;
+    }
+    
+    .audio-time {
+      color: #d4af37;
+      font-size: 0.9rem;
+      min-width: 60px;
+      text-align: right;
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .timeline::before {
+        left: 2rem;
+      }
+      
+      .timeline-item:nth-child(odd),
+      .timeline-item:nth-child(even) {
+        padding-left: 5rem;
+        padding-right: 0;
+        text-align: left;
+      }
+      
+      .timeline-item:nth-child(odd) .timeline-content::after,
+      .timeline-item:nth-child(even) .timeline-content::after {
+        left: -1rem;
+        right: auto;
+        border-top: 1rem solid transparent;
+        border-bottom: 1rem solid transparent;
+        border-right: 1rem solid rgba(31, 41, 55, 0.85);
+        border-left: none;
+      }
+      
+      .timeline-item:nth-child(odd) .timeline-dot,
+      .timeline-item:nth-child(even) .timeline-dot {
+        left: calc(2rem - 12px);
+        right: auto;
+      }
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden font-sans bg-gray-900 text-white">
+  <!-- 导航栏 -->
+  <nav class="fixed top-0 left-0 w-full z-50 transition-all duration-500" id="main-nav">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="../index.html" class="flex items-center space-x-2">
+        <span class="text-red-600 text-3xl"><i class="fas fa-flag"></i></span>
+        <span class="text-white text-xl font-bold">长征纪念</span>
+      </a>
+      
+      <!-- 桌面导航 -->
+      <div class="hidden md:flex space-x-8">
+        <a href="../index.html" class="text-white hover:text-red-400 transition-colors font-medium">首页</a>
+        <a href="../pages/map.html" class="text-white hover:text-red-400 transition-colors font-medium">重走长征路</a>
+        <a href="../pages/data.html" class="text-white hover:text-red-400 transition-colors font-medium">牺牲人数统计</a>
+        <a href="../pages/settings.html" class="text-white hover:text-red-400 transition-colors font-medium">设置</a>
+      </div>
+      
+      <!-- 移动端菜单按钮 -->
+      <button class="md:hidden text-white text-2xl" id="menu-toggle">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+    
+    <!-- 移动端导航菜单 -->
+    <div class="md:hidden bg-gray-900 bg-opacity-95 w-full absolute top-full left-0 py-4 px-4 hidden" id="mobile-menu">
+      <div class="flex flex-col space-y-4">
+        <a href="../index.html" class="text-white hover:text-red-400 transition-colors font-medium py-2">首页</a>
+        <a href="../pages/map.html" class="text-white hover:text-red-400 transition-colors font-medium py-2">重走长征路</a>
+        <a href="../pages/data.html" class="text-white hover:text-red-400 transition-colors font-medium py-2">牺牲人数统计</a>
+        <a href="../pages/settings.html" class="text-white hover:text-red-400 transition-colors font-medium py-2">设置</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 英雄区 -->
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">瑞金出发</h1>
+      <div class="hero-date">1934年10月</div>
+      <a href="#overview" class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-all transform hover:scale-105 mt-4">
+        了解详情
+      </a>
+    </div>
+    <!-- 背景图片将通过JavaScript设置 -->
+  </section>
+
+  <!-- 主要内容 -->
+  <main class="container mx-auto px-4 py-12">
+    <!-- 概述 -->
+    <section id="overview" class="mb-16">
+      <h2 class="text-3xl font-bold mb-6">历史背景</h2>
+      <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+        <p class="text-lg mb-4">
+          1934年10月，中央红军从瑞金出发，开始了伟大的长征。这是一次为了摆脱国民党军队的包围追击，保存革命力量的战略转移。
+        </p>
+        <p class="text-lg mb-4">
+          由于王明"左"倾冒险主义的错误领导，中央红军未能打破国民党军队的第五次"围剿"，被迫实行战略转移。1934年10月10日，中共中央、中革军委率中央红军主力8.6万余人，从瑞金等地出发，开始了震惊中外的二万五千里长征。
+        </p>
+        
+        <div class="quote-block">
+          <div class="quote-text">
+            "我们中华民族有同自己的敌人血战到底的气概，有在自力更生的基础上光复旧物的决心，有自立于世界民族之林的能力。"
+          </div>
+          <div class="quote-author">—— 毛泽东</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 时间线 -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-12 text-center">事件时间线</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">1934年10月10日</div>
+            <h3 class="timeline-title">中央红军开始长征</h3>
+            <p>中共中央、中革军委率中央红军主力从瑞金出发，开始长征。</p>
+          </div>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">1934年10月17日</div>
+            <h3 class="timeline-title">渡过于都河</h3>
+            <p>中央红军渡过于都河，离开中央苏区，开始了艰苦卓绝的长征。</p>
+          </div>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">1934年10月21日</div>
+            <h3 class="timeline-title">突破第一道封锁线</h3>
+            <p>红军突破国民党军设置的第一道封锁线，向湖南、广东边境前进。</p>
+          </div>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">1934年11月8日</div>
+            <h3 class="timeline-title">突破第二道封锁线</h3>
+            <p>红军突破国民党军设置的第二道封锁线，继续向西前进。</p>
+          </div>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">1934年11月15日</div>
+            <h3 class="timeline-title">突破第三道封锁线</h3>
+            <p>红军突破国民党军设置的第三道封锁线，进入湖南、广西边境。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 历史照片 -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8">历史照片</h2>
+      <div class="gallery-grid">
+        <div class="gallery-item">
+          <img src="https://p11-doubao-search-sign.byteimg.com/labis/f02822502e26b67ee521a1f17fb243b2~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=yEvQCDGbeokHQYztH%2BlJ7fzQCBw%3D" alt="红军长征">
+          <div class="gallery-overlay">
+            <div class="gallery-caption">红军长征历史照片</div>
+          </div>
+        </div>
+        
+        <div class="gallery-item">
+          <img src="https://p11-doubao-search-sign.byteimg.com/labis/de5ac629966f56ef4dcb2b8230bf442d~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=YzPTufuF9yaIPb7iRD40Ib%2BQh78%3D" alt="红军长征">
+          <div class="gallery-overlay">
+            <div class="gallery-caption">红军长征历史照片</div>
+          </div>
+        </div>
+        
+        <div class="gallery-item">
+          <img src="https://p11-doubao-search-sign.byteimg.com/labis/060a617a93af8e982bc199ecc43de15b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=jakbD%2BaNlY6nDdfAAKcWjPY727c%3D" alt="长征地图">
+          <div class="gallery-overlay">
+            <div class="gallery-caption">长征路线图</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 音频解说 -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8">音频解说</h2>
+      <div class="audio-player">
+        <div class="audio-controls">
+          <div class="audio-control-btn" id="play-btn">
+            <i class="fas fa-play"></i>
+          </div>
+          <div class="audio-control-btn" id="pause-btn" style="display: none;">
+            <i class="fas fa-pause"></i>
+          </div>
+          <div class="audio-control-btn" id="stop-btn">
+            <i class="fas fa-stop"></i>
+          </div>
+        </div>
+        
+        <div class="audio-progress" id="audio-progress">
+          <div class="audio-progress-bar" id="audio-progress-bar"></div>
+        </div>
+        
+        <div class="audio-time" id="audio-time">00:00 / 00:00</div>
+      </div>
+    </section>
+    
+    <!-- 相关故事 -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8">相关故事</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+          <h3 class="text-xl font-bold mb-4 text-red-500">于都河畔的告别</h3>
+          <p class="mb-4">
+            1934年10月，红军主力部队要离开中央苏区的消息在于都河畔悄悄传开。当地群众纷纷来到河边，为红军战士送行。许多妇女连夜为红军赶制布鞋、缝补衣服，老人和孩子们则把家里仅有的粮食拿出来，塞给红军战士。
+          </p>
+          <p>
+            一位老大娘拉着红军战士的手说："孩子，你们一定要回来啊！我们等着你们！"战士们含着泪点头，他们知道，这一别不知道什么时候才能回来，甚至可能再也回不来了。
+          </p>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+          <h3 class="text-xl font-bold mb-4 text-red-500">红色交通线</h3>
+          <p class="mb-4">
+            在长征开始前，为了保证中央红军主力顺利转移，中共中央建立了一条从上海经香港、汕头、大埔、永定到瑞金的秘密交通线。这条交通线在传递情报、运送物资和人员转移等方面发挥了重要作用。
+          </p>
+          <p>
+            交通员们冒着生命危险，在敌人的严密监视下，巧妙地将情报、药品、武器等物资运送到中央苏区，为红军长征的准备工作提供了重要支持。
+          </p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 纪念意义 -->
+    <section class="mb-16">
+      <h2 class="text-3xl font-bold mb-8">历史意义</h2>
+      <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+        <p class="text-lg mb-4">
+          瑞金出发标志着长征的开始，是中国革命史上的重要里程碑。它不仅是一次战略转移，更是一次伟大的战略决策，为中国革命保存了珍贵的火种。
+        </p>
+        <p class="text-lg mb-4">
+          从瑞金出发的8.6万红军将士，经过艰苦卓绝的长征，最终只有7000余人到达陕北。但正是这7000余人，成为了中国革命的中坚力量，为中国革命的胜利奠定了基础。
+        </p>
+        <p class="text-lg">
+          瑞金作为中央苏区的中心，作为红军长征的出发点，在中国革命史上具有重要的历史地位。今天，瑞金已经成为重要的爱国主义教育基地，吸引着无数人前来参观学习，缅怀革命先烈的丰功伟绩。
+        </p>
+      </div>
+    </section>
+    
+    <!-- 下一步 -->
+    <section class="text-center">
+      <h2 class="text-3xl font-bold mb-8">继续长征之旅</h2>
+      <a href="zunyi.html" class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-all transform hover:scale-105">
+        下一站：遵义会议 <i class="fas fa-arrow-right ml-2"></i>
+      </a>
+    </section>
+  </main>
+
+  <!-- 底部区域 -->
+  <footer class="bg-gray-900 border-t border-gray-800 py-12">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <h3 class="text-xl font-bold text-white mb-4">长征纪念</h3>
+          <p class="text-gray-400">
+            传承长征精神，弘扬革命文化，让历史照亮未来。
+          </p>
+        </div>
+        
+        <div>
+          <h3 class="text-xl font-bold text-white mb-4">快速链接</h3>
+          <ul class="space-y-2">
+            <li><a href="../index.html" class="text-gray-400 hover:text-red-400 transition-colors">首页</a></li>
+            <li><a href="../pages/map.html" class="text-gray-400 hover:text-red-400 transition-colors">重走长征路</a></li>
+            <li><a href="../pages/data.html" class="text-gray-400 hover:text-red-400 transition-colors">牺牲人数统计</a></li>
+            <li><a href="../pages/settings.html" class="text-gray-400 hover:text-red-400 transition-colors">设置</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="text-xl font-bold text-white mb-4">联系我们</h3>
+          <ul class="space-y-2">
+            <li class="flex items-center text-gray-400">
+              <i class="fas fa-envelope mr-2 text-red-500"></i>
+              <span>contact@longmarch-memorial.com</span>
+            </li>
+            <li class="flex items-center text-gray-400">
+              <i class="fas fa-phone mr-2 text-red-500"></i>
+              <span>+86 123 4567 8910</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+        <p class="text-gray-500">
+          © 2023 长征纪念网站. 保留所有权利.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 模式切换按钮 -->
+  <button id="mode-toggle" class="fixed bottom-8 right-8 bg-red-600 hover:bg-red-700 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg z-50 transition-all transform hover:scale-110">
+    <i class="fas fa-moon"></i>
+  </button>
+
+  <!-- JavaScript -->
+  <script src="../js/main.js"></script>
+  <script src="../js/mode-switch.js"></script>
+  <script>
+    // 节点详情页面特定脚本
+    document.addEventListener('DOMContentLoaded', function() {
+      // 设置英雄区背景图片
+      const heroSection = document.querySelector('.hero-section');
+      heroSection.style.backgroundImage = `url('https://p11-doubao-search-sign.byteimg.com/labis/f02822502e26b67ee521a1f17fb243b2~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=yEvQCDGbeokHQYztH%2BlJ7fzQCBw%3D')`;
+      heroSection.style.backgroundSize = 'cover';
+      heroSection.style.backgroundPosition = 'center';
+      
+      // 初始化时间线动画
+      initTimelineAnimation();
+      
+      // 初始化音频播放器
+      initAudioPlayer();
+    });
+    
+    /**
+     * 初始化时间线动画
+     */
+    function initTimelineAnimation() {
+      const timelineItems = document.querySelectorAll('.timeline-item');
+      
+      timelineItems.forEach((item, index) => {
+        gsap.from(item, {
+          scrollTrigger: {
+            trigger: item,
+            start: 'top 80%'
+          },
+          opacity: 0,
+          y: 50,
+          duration: 0.8,
+          delay: index * 0.2
+        });
+      });
+    }
+    
+    /**
+     * 初始化音频播放器
+     */
+    function initAudioPlayer() {
+      const playBtn = document.getElementById('play-btn');
+      const pauseBtn = document.getElementById('pause-btn');
+      const stopBtn = document.getElementById('stop-btn');
+      const progressBar = document.getElementById('audio-progress-bar');
+      const progress = document.getElementById('audio-progress');
+      const timeDisplay = document.getElementById('audio-time');
+      
+      // 创建音频对象
+      const audio = new Audio();
+      audio.src = '../assets/audio/ruijin.mp3';
+      
+      // 播放按钮点击事件
+      playBtn.addEventListener('click', function() {
+        audio.play().catch(error => {
+          console.error('音频播放失败:', error);
+        });
+        playBtn.style.display = 'none';
+        pauseBtn.style.display = 'flex';
+      });
+      
+      // 暂停按钮点击事件
+      pauseBtn.addEventListener('click', function() {
+        audio.pause();
+        pauseBtn.style.display = 'none';
+        playBtn.style.display = 'flex';
+      });
+      
+      // 停止按钮点击事件
+      stopBtn.addEventListener('click', function() {
+        audio.pause();
+        audio.currentTime = 0;
+        pauseBtn.style.display = 'none';
+        playBtn.style.display = 'flex';
+        progressBar.style.width = '0%';
+        updateTimeDisplay(0, audio.duration);
+      });
+      
+      // 音频进度更新事件
+      audio.addEventListener('timeupdate', function() {
+        const percent = (audio.currentTime / audio.duration) * 100;
+        progressBar.style.width = `${percent}%`;
+        updateTimeDisplay(audio.currentTime, audio.duration);
+      });
+      
+      // 音频结束事件
+      audio.addEventListener('ended', function() {
+        pauseBtn.style.display = 'none';
+        playBtn.style.display = 'flex';
+        progressBar.style.width = '0%';
+        updateTimeDisplay(0, audio.duration);
+      });
+      
+      // 音频加载元数据事件
+      audio.addEventListener('loadedmetadata', function() {
+        updateTimeDisplay(0, audio.duration);
+      });
+      
+      // 点击进度条跳转到指定位置
+      progress.addEventListener('click', function(e) {
+        const rect = progress.getBoundingClientRect();
+        const pos = (e.clientX - rect.left) / rect.width;
+        audio.currentTime = pos * audio.duration;
+      });
+      
+      /**
+       * 更新时间显示
+       * @param {number} currentTime - 当前时间（秒）
+       * @param {number} duration - 总时长（秒）
+       */
+      function updateTimeDisplay(currentTime, duration) {
+        const currentMinutes = Math.floor(currentTime / 60);
+        const currentSeconds = Math.floor(currentTime % 60);
+        const totalMinutes = Math.floor(duration / 60);
+        const totalSeconds = Math.floor(duration % 60);
+        
+        const currentTimeString = `${currentMinutes.toString().padStart(2, '0')}:${currentSeconds.toString().padStart(2, '0')}`;
+        const totalTimeString = `${totalMinutes.toString().padStart(2, '0')}:${totalSeconds.toString().padStart(2, '0')}`;
+        
+        timeDisplay.textContent = `${currentTimeString} / ${totalTimeString}`;
+      }
+    }
+  </script>
+</body>
+</html>

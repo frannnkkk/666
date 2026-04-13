@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>长征牺牲人数统计 - 长征纪念</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- GSAP 动画库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* 数据可视化页面特定样式 */
+    #data-viz-container {
+      position: relative;
+      width: 100%;
+      height: 80vh;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+    
+    .weather-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    .weather-overlay.active {
+      pointer-events: auto;
+    }
+    
+    .data-card {
+      background-color: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+      padding: 1.5rem;
+      color: white;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    
+    .data-card.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .data-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .data-card h3 {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: #dc2626;
+    }
+    
+    .data-card .number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #d4af37;
+      margin-bottom: 0.5rem;
+    }
+    
+    .data-card p {
+      color: #e5e7eb;
+      font-size: 0.9rem;
+    }
+    
+    .section-title {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 2rem;
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background-color: #dc2626;
+    }
+    
+    .filter-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      background-color: #374151;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .filter-btn:hover {
+      background-color: #4b5563;
+    }
+    
+    .filter-btn.active {
+      background-color: #dc2626;
+    }
+    
+    .insight-box {
+      background-color: rgba(220, 38, 38, 0.1);
+      border-left: 4px solid #dc2626;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+    
+    .insight-box h4 {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: #dc2626;
+    }
+    
+    .insight-box p {
+      color: #e5e7eb;
+      font-size: 0.9rem;
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      #data-viz-container {
+        height: 60vh;
+      }
+      
+      .filter-controls {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden font-sans bg-gray-900 text-white">
+  <!-- 导航栏 -->
+  <nav class="fixed top-0 left-0 w-full z-50 transition-all duration-500" id="main-nav">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="../index.html" class="flex items-center space-x-2">
+        <span class="text-red-600 text-3xl"><i class="fas fa-flag"></i></span>
+        <span class="text-white text-xl font-bold">长征纪念</span>
+      </a>
+      
+      <!-- 桌面导航 -->
+      <div class="hidden md:flex space-x-8">
+        <a href="../index.html" class="text-white hover:text-red-400 transition-colors font-medium">首页</a>
+        <a href="map.html" class="text-white hover:text-red-400 transition-colors font-medium">重走长征路</a>
+        <a href="data.html" class="text-red-400 hover:text-red-300 transition-colors font-medium">牺牲人数统计</a>
+        <a href="settings.html" class="text-white hover:text-red-400 transition-colors font-medium">设置</a>
+      </div>
+      
+      <!-- 移动端菜单按钮 -->
+      <button class="md:hidden text-white text-2xl" id="menu-toggle">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+    
+    <!-- 移动端导航菜单 -->
+    <div class="md:hidden bg-gray-900 bg-opacity-95 w-full absolute top-full left-0 py-4 px-4 hidden" id="mobile-menu">
+      <div class="flex flex-col space-y-4">
+        <a href="../index.html" class="text-white hover:text-red-400 transition-colors font-medium py-2">首页</a>
+        <a href="map.html" class="text-white hover:text-red-400 transition-colors font-medium py-2">重走长征路</a>
+        <a href="data.html" class="text-red-400 hover:text-red-300 transition-colors font-medium py-2">牺牲人数统计</a>
+        <a href="settings.html" class="text-white hover:text-red-400 transition-colors font-medium py-2">设置</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 主要内容 -->
+  <main class="container mx-auto px-4 pt-24 pb-12">
+    <!-- 页面标题 -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">长征牺牲人数统计</h1>
+      <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+        通过数据可视化方式，铭记长征中牺牲的革命先烈，感受革命先辈的牺牲精神与信仰力量
+      </p>
+    </div>
+    
+    <!-- 数据可视化容器 -->
+    <div id="data-viz-container" class="mb-12">
+      <!-- 天气效果覆盖层 -->
+      <canvas class="weather-overlay" id="weather-overlay"></canvas>
+      
+      <!-- 图表容器 -->
+      <div class="chart-container">
+        <canvas id="casualties-chart"></canvas>
+      </div>
+    </div>
+    
+    <!-- 过滤控制 -->
+    <div class="filter-controls mb-12">
+      <button class="filter-btn active" data-filter="all">全部数据</button>
+      <button class="filter-btn" data-filter="battle">战役牺牲</button>
+      <button class="filter-btn" data-filter="disease">疾病牺牲</button>
+      <button class="filter-btn" data-filter="weather">恶劣天气牺牲</button>
+    </div>
+    
+    <!-- 关键洞察 -->
+    <div class="mb-12">
+      <h2 class="section-title text-2xl md:text-3xl font-bold">关键洞察</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="insight-box">
+          <h4><i class="fas fa-chart-line mr-2"></i> 牺牲高峰</h4>
+          <p>湘江战役是长征中牺牲人数最多的战役，红军损失约3万人，占长征出发总人数的三分之一以上。</p>
+        </div>
+        
+        <div class="insight-box">
+          <h4><i class="fas fa-disease mr-2"></i> 非战斗减员</h4>
+          <p>除了战斗牺牲外，疾病、饥饿和恶劣天气也是造成红军减员的重要原因，特别是在过草地期间。</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 详细数据卡片 -->
+    <div class="mb-12">
+      <h2 class="section-title text-2xl md:text-3xl font-bold">详细数据</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- 数据卡片 1 -->
+        <div class="data-card" data-delay="0">
+          <h3>出发总人数</h3>
+          <div class="number">86,000</div>
+          <p>1934年10月，中央红军从瑞金出发时的总人数约为86,000人。</p>
+        </div>
+        
+        <!-- 数据卡片 2 -->
+        <div class="data-card" data-delay="1">
+          <h3>牺牲总人数</h3>
+          <div class="number">79,000</div>
+          <p>长征期间，中央红军牺牲和失踪的总人数约为79,000人，存活率仅为8.1%。</p>
+        </div>
+        
+        <!-- 数据卡片 3 -->
+        <div class="data-card" data-delay="2">
+          <h3>会师人数</h3>
+          <div class="number">7,000</div>
+          <p>1935年10月，中央红军到达陕北吴起镇时，仅剩约7,000人。</p>
+        </div>
+        
+        <!-- 数据卡片 4 -->
+        <div class="data-card" data-delay="3">
+          <h3>湘江战役牺牲</h3>
+          <div class="number">30,000</div>
+          <p>1934年11月-12月，湘江战役中红军牺牲约30,000人，是长征中最惨烈的战役。</p>
+        </div>
+        
+        <!-- 数据卡片 5 -->
+        <div class="data-card" data-delay="4">
+          <h3>过草地牺牲</h3>
+          <div class="number">10,000</div>
+          <p>1935年8月-9月，红军过草地期间，约有10,000人因饥饿、疾病和恶劣天气牺牲。</p>
+        </div>
+        
+        <!-- 数据卡片 6 -->
+        <div class="data-card" data-delay="5">
+          <h3>翻雪山牺牲</h3>
+          <div class="number">5,000</div>
+          <p>1935年6月-7月，红军翻越几座大雪山期间，约有5,000人因严寒和缺氧牺牲。</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 历史照片展示 -->
+    <div class="mb-12">
+      <h2 class="section-title text-2xl md:text-3xl font-bold">历史照片</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+          <img src="https://p11-doubao-search-sign.byteimg.com/labis/de5ac629966f56ef4dcb2b8230bf442d~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=YzPTufuF9yaIPb7iRD40Ib%2BQh78%3D" alt="长征历史照片" class="w-full h-48 object-cover">
+          <div class="p-4">
+            <h3 class="font-bold mb-2">红军长征历史照片</h3>
+            <p class="text-gray-400 text-sm">记录了红军长征中的真实场景</p>
+          </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+          <img src="https://p11-doubao-search-sign.byteimg.com/mosaic-legacy/31d5000234902ae71574~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=S4KNxoc2yn0dZzjux0NQAjftMI4%3D" alt="泸定桥" class="w-full h-48 object-cover">
+          <div class="p-4">
+            <h3 class="font-bold mb-2">飞夺泸定桥</h3>
+            <p class="text-gray-400 text-sm">红军战士冒着敌人的枪林弹雨，攀着铁索向对岸冲击</p>
+          </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+          <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/cbfa1f6591f2447cac94c45a8781b879~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202604132057078A798868029C4A520C54&rrcfp=f06b921b&x-expires=1778677170&x-signature=Gie5DbmvPI7KO%2FdX1QTS4Ryac1k%3D" alt="翻雪山" class="w-full h-48 object-cover">
+          <div class="p-4">
+            <h3 class="font-bold mb-2">翻越雪山</h3>
+            <p class="text-gray-400 text-sm">红军战士们克服了高原缺氧、严寒等困难，成功翻越了几座大雪山</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 纪念留言 -->
+    <div>
+      <h2 class="section-title text-2xl md:text-3xl font-bold">纪念留言</h2>
+      
+      <div class="bg-gray-800 rounded-lg p-6">
+        <p class="text-xl italic text-center mb-6">
+          "为有牺牲多壮志，敢教日月换新天。"
+        </p>
+        
+        <div class="text-center">
+          <a href="#" class="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-all transform hover:scale-105">
+            留下您的纪念
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 模式切换按钮 -->
+  <button id="mode-toggle" class="fixed bottom-8 right-8 bg-red-600 hover:bg-red-700 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg z-50 transition-all transform hover:scale-110">
+    <i class="fas fa-moon"></i>
+  </button>
+
+  <!-- JavaScript -->
+  <script src="../js/main.js"></script>
+  <script src="../js/mode-switch.js"></script>
+  <script src="js/data-viz.js"></script>
+</body>
+</html>

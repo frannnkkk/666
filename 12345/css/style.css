@@ -1,0 +1,379 @@
+/* 全局样式 */
+:root {
+  --primary-color: #dc2626; /* 中国红 */
+  --secondary-color: #d4af37; /* 岁月金 */
+  --accent-color: #6b7280; /* 硝烟灰 */
+  --dark-bg: #111827; /* 深色背景 */
+  --light-text: #f3f4f6; /* 浅色文字 */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Noto Sans SC', sans-serif;
+  background-color: var(--dark-bg);
+  color: var(--light-text);
+  overflow-x: hidden;
+}
+
+/* 导航栏样式 */
+#main-nav {
+  background-color: rgba(17, 24, 39, 0.8);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+#main-nav.scrolled {
+  background-color: rgba(17, 24, 39, 0.95);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* 首屏英雄区样式 */
+#hero-section {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+#particles-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+#terrain-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://p26-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/ce2963be481b49d699ba3bef02af7fe1~tplv-a9rns2rl98-image.image?lk3s=8e244e95&rcl=202604132057078A798868029C4A520C54&rrcfp=f06b921b&x-expires=1778677173&x-signature=eIlstneuESqkbTCFtyUDpYTnwWc%3D');
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  opacity: 0.7;
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary:hover {
+  background-color: #b91c1c;
+  transform: scale(1.05);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+.btn-secondary:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: scale(1.05);
+}
+
+/* 卡片样式 */
+.card {
+  background-color: #1f2937;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 标题样式 */
+.section-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background-color: var(--primary-color);
+}
+
+/* 模式切换样式 */
+.info-mode {
+  /* 信息模式样式 */
+}
+
+.immersive-mode {
+  /* 沉浸模式样式 */
+}
+
+/* 信息模式特定样式 */
+.info-mode #sidebar {
+  width: 300px;
+  opacity: 1;
+}
+
+.info-mode #main-content {
+  margin-left: 300px;
+}
+
+.info-mode #particles-bg.disabled {
+  opacity: 0.2;
+}
+
+/* 沉浸模式特定样式 */
+.immersive-mode #sidebar {
+  width: 60px;
+  opacity: 0.8;
+}
+
+.immersive-mode #main-content {
+  margin-left: 60px;
+}
+
+.immersive-mode #particles-bg:not(.disabled) {
+  opacity: 1;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .mobile-nav {
+    display: flex;
+  }
+  
+  .desktop-nav {
+    display: none;
+  }
+  
+  .card-container {
+    flex-direction: column;
+  }
+  
+  .card {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  #map-container {
+    height: 60vh;
+  }
+  
+  .weather-overlay {
+    display: none;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+}
+
+/* 平板适配 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .card-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 桌面端适配 */
+@media (min-width: 1025px) {
+  .card-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b91c1c;
+}
+
+/* 自定义工具类 */
+.text-shadow {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.bg-gradient-red-gold {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+
+.transition-all-300 {
+  transition: all 0.3s ease;
+}
+
+/* 粒子特效禁用状态 */
+#particles-bg.disabled {
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+/* 3D地图容器 */
+#map-container {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+/* 数据可视化容器 */
+#data-viz-container {
+  position: relative;
+  width: 100%;
+  height: 60vh;
+  overflow: hidden;
+}
+
+/* 天气效果覆盖层 */
+.weather-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* 时间滤镜动画 */
+.time-filter {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.5s ease;
+}
+
+.time-filter.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.time-filter .countdown {
+  font-size: 4rem;
+  color: white;
+  font-weight: bold;
+}
+
+/* 音频控制按钮 */
+.audio-control {
+  position: fixed;
+  bottom: 8rem;
+  right: 2rem;
+  background: rgba(220, 38, 38, 0.8);
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 50;
+  transition: all 0.3s ease;
+}
+
+.audio-control:hover {
+  background: rgba(220, 38, 38, 1);
+  transform: scale(1.1);
+}
