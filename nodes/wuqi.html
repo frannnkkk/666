@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>吴起镇会师 - 长征纪念</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- GSAP 动画库 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* 节点详情页特定样式 */
+    .timeline-item {
+      position: relative;
+      padding-left: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background-color: #dc2626;
+    }
+    
+    .timeline-item::after {
+      content: '';
+      position: absolute;
+      left: -0.5rem;
+      top: 0;
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      background-color: #dc2626;
+      border: 2px solid white;
+    }
+    
+    .timeline-date {
+      font-weight: bold;
+      color: #d4af37;
+      margin-bottom: 0.5rem;
+    }
+    
+    .photo-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .photo-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    
+    .photo-item:hover {
+      transform: scale(1.05);
+    }
+    
+    .photo-item img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    
+    .photo-item:hover img {
+      transform: scale(1.1);
+    }
+    
+    .photo-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .photo-item:hover .photo-caption {
+      transform: translateY(0);
+    }
+    
+    /* 音频播放器样式 */
+    .audio-player {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: rgba(17, 24, 39, 0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 50px;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      z-index: 100;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      transform: translateY(150%);
+      transition: transform 0.3s ease;
+    }
+    
+    .audio-player.visible {
+      transform: translateY(0);
+    }
+    
+    .audio-player .play-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #dc2626;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .audio-player .play-btn:hover {
+      transform: scale(1.1);
+      background-color: #b91c1c;
+    }
+    
+    .audio-player .progress {
+      width: 200px;
+      height: 4px;
+      background-color: #374151;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    
+    .audio-player .progress-bar {
+      height: 100%;
+      background-color: #dc2626;
+      width: 0;
+      transition: width 0.1s linear;
+    }
+    
+    .audio-player .time {
+      color: #d1d5db;
+      font-size: 0.875rem;
+    }
+    
+    /* 模态框样式 */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+    }
+    
+    .modal-content img {
+      max-width: 100%;
+      max-height: 90vh;
+      object-fit: contain;
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    
+    .modal-close:hover {
+      color: #dc2626;
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .audio-player {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        padding: 0.75rem 1rem;
+      }
+      
+      .audio-player .progress {
+        width: 100px;
+      }
+      
+      .modal-close {
+        top: 1rem;
+        right: 1rem;
+      }
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden font-sans bg-gray-900">
+  <!-- 导航栏 -->
+  <nav class="fixed top-0 left-0 w-full z-50 transition-all duration-500" id="main-nav">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="../index.html" class="flex items-center space-x-2">
+        <span class="text-red-600 text-3xl"><i class="fas fa-flag"></i></span>
+        <span class="text-white text-xl font-bold">长征纪念</span>
+      </a>
+      
+      <!-- 桌面导航 -->
+      <div class="hidden md:flex space-x-8">
+        <a href="../index.html" class="text-white hover:text-red-400 transition-colors font-medium">首页</a>
+        <a href="../pages/map.html" class="text-white hover:text-red-400 transition-colors font-medium">重走长征路</a>
+        <a href="../pages/data.html" class="text-white hover:text-red-400 transition-colors font-medium">牺牲人数统计</a>
+        <a href="../pages/settings.html" class="text-white hover:text-red-400 transition-colors font-medium">设置</a>
+      </div>
+      
+      <!-- 移动端菜单按钮 -->
+      <button class="md:hidden text-white text-2xl" id="menu-toggle">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+    
+    <!-- 移动端导航菜单 -->
+    <div class="md:hidden bg-gray-900 bg-opacity-95 w-full absolute top-full left-0 py-4 px-4 hidden" id="mobile-menu">
+      <div class="flex flex-col space-y-4">
+        <a href="../index.html" class="text-white hover:text-red-400 transition-colors font-medium py-2">首页</a>
+        <a href="../pages/map.html" class="text-white hover:text-red-400 transition-colors font-medium py-2">重走长征路</a>
+        <a href="../pages/data.html" class="text-white hover:text-red-400 transition-colors font-medium py-2">牺牲人数统计</a>
+        <a href="../pages/settings.html" class="text-white hover:text-red-400 transition-colors font-medium py-2">设置</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 头部区域 -->
+  <header class="relative h-screen flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 z-0">
+      <img src="https://p26-doubao-search-sign.byteimg.com/labis/351108db731f39a93b37f58f3fe29c6b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=AZ3GR%2B3v4knxaP%2FmCM0%2Blt0FrBw%3D" alt="吴起镇会师" class="w-full h-full object-cover opacity-50">
+      <div class="absolute inset-0 bg-gradient-to-b from-transparent to-gray-900"></div>
+    </div>
+    
+    <div class="container mx-auto px-4 z-10 text-center">
+      <h1 class="text-4xl md:text-6xl font-bold text-white mb-4 opacity-0" id="node-header-title">
+        吴起镇会师
+      </h1>
+      <p class="text-xl md:text-2xl text-gray-200 mb-8 opacity-0" id="node-header-date">
+        1935年10月
+      </p>
+      <div class="flex flex-col md:flex-row justify-center gap-4 opacity-0" id="node-header-buttons">
+        <button id="play-audio-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-all transform hover:scale-105 flex items-center justify-center">
+          <i class="fas fa-volume-up mr-2"></i> 播放解说
+        </button>
+        <a href="../pages/map.html" class="bg-transparent border-2 border-white hover:border-red-400 text-white hover:text-red-400 font-bold py-3 px-8 rounded-full transition-all transform hover:scale-105 flex items-center justify-center">
+          <i class="fas fa-map-marked-alt mr-2"></i> 返回地图
+        </a>
+      </div>
+    </div>
+    
+    <!-- 向下滚动指示 -->
+    <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+      <a href="#overview" class="text-white text-4xl">
+        <i class="fas fa-chevron-down"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- 概述区域 -->
+  <section class="py-20 bg-gray-900" id="overview">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-white mb-16 opacity-0" id="overview-title">
+        历史概述
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div class="opacity-0" id="overview-image">
+          <img src="https://p26-doubao-search-sign.byteimg.com/labis/351108db731f39a93b37f58f3fe29c6b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=AZ3GR%2B3v4knxaP%2FmCM0%2Blt0FrBw%3D" alt="吴起镇会师" class="w-full rounded-lg shadow-2xl">
+        </div>
+        
+        <div class="space-y-6 opacity-0" id="overview-content">
+          <p class="text-xl text-gray-300 leading-relaxed">
+            1935年10月，中央红军到达陕北吴起镇，与陕北红军胜利会师，标志着中央红军长征的胜利结束。
+          </p>
+          <p class="text-xl text-gray-300 leading-relaxed">
+            经过一年的艰苦跋涉，中央红军从瑞金出发时的8.6万人，只剩下7000多人。但是，他们胜利完成了战略转移，为中国革命保存了珍贵的火种。
+          </p>
+          <p class="text-xl text-gray-300 leading-relaxed">
+            吴起镇会师后，中国革命的重心从南方转移到了北方，陕北成为了中国革命的新的大本营。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 时间线区域 -->
+  <section class="py-20 bg-gray-800">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-white mb-16 opacity-0" id="timeline-title">
+        事件时间线
+      </h2>
+      
+      <div class="max-w-3xl mx-auto space-y-8 opacity-0" id="timeline-content">
+        <div class="timeline-item">
+          <div class="timeline-date">1935年9月27日</div>
+          <div class="bg-gray-700 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-bold text-white mb-2">榜罗镇会议</h3>
+            <p class="text-gray-300">
+              中共中央在甘肃通渭县榜罗镇召开政治局常委会议，决定将红军长征的落脚点放在陕北，与陕北红军会师。
+            </p>
+          </div>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-date">1935年10月19日</div>
+          <div class="bg-gray-700 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-bold text-white mb-2">中央红军到达吴起镇</h3>
+            <p class="text-gray-300">
+              中央红军（陕甘支队）到达陕北吴起镇，与陕北红军游击队胜利会师。当地群众热烈欢迎红军的到来。
+            </p>
+          </div>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-date">1935年10月22日</div>
+          <div class="bg-gray-700 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-bold text-white mb-2">吴起镇会议</h3>
+            <p class="text-gray-300">
+              中共中央在吴起镇召开政治局会议，总结长征经验，讨论当前形势和任务，决定在陕北建立根据地。
+            </p>
+          </div>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-date">1935年11月21日-24日</div>
+          <div class="bg-gray-700 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-bold text-white mb-2">直罗镇战役</h3>
+            <p class="text-gray-300">
+              中央红军与陕北红军并肩作战，取得直罗镇战役的胜利，为党中央在陕北立足奠定了基础。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 历史照片区域 -->
+  <section class="py-20 bg-gray-900">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-white mb-16 opacity-0" id="photos-title">
+        历史照片
+      </h2>
+      
+      <div class="photo-gallery opacity-0" id="photo-gallery">
+        <div class="photo-item" data-img="https://p26-doubao-search-sign.byteimg.com/labis/351108db731f39a93b37f58f3fe29c6b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=AZ3GR%2B3v4knxaP%2FmCM0%2Blt0FrBw%3D">
+          <img src="https://p26-doubao-search-sign.byteimg.com/labis/351108db731f39a93b37f58f3fe29c6b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=AZ3GR%2B3v4knxaP%2FmCM0%2Blt0FrBw%3D" alt="吴起镇会师">
+          <div class="photo-caption">中央红军与陕北红军胜利会师</div>
+        </div>
+        
+        <div class="photo-item" data-img="https://p26-doubao-search-sign.byteimg.com/labis/351108db731f39a93b37f58f3fe29c6b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=AZ3GR%2B3v4knxaP%2FmCM0%2Blt0FrBw%3D">
+          <img src="https://p26-doubao-search-sign.byteimg.com/labis/351108db731f39a93b37f58f3fe29c6b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=AZ3GR%2B3v4knxaP%2FmCM0%2Blt0FrBw%3D" alt="吴起镇">
+          <div class="photo-caption">今日吴起镇</div>
+        </div>
+        
+        <div class="photo-item" data-img="https://p26-doubao-search-sign.byteimg.com/labis/351108db731f39a93b37f58f3fe29c6b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=AZ3GR%2B3v4knxaP%2FmCM0%2Blt0FrBw%3D">
+          <img src="https://p26-doubao-search-sign.byteimg.com/labis/351108db731f39a93b37f58f3fe29c6b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=AZ3GR%2B3v4knxaP%2FmCM0%2Blt0FrBw%3D" alt="红军战士">
+          <div class="photo-caption">红军战士们在陕北</div>
+        </div>
+        
+        <div class="photo-item" data-img="https://p26-doubao-search-sign.byteimg.com/labis/351108db731f39a93b37f58f3fe29c6b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=AZ3GR%2B3v4knxaP%2FmCM0%2Blt0FrBw%3D">
+          <img src="https://p26-doubao-search-sign.byteimg.com/labis/351108db731f39a93b37f58f3fe29c6b~tplv-be4g95zd3a-image.jpeg?lk3s=feb11e32&x-expires=1791637144&x-signature=AZ3GR%2B3v4knxaP%2FmCM0%2Blt0FrBw%3D" alt="会师纪念">
+          <div class="photo-caption">吴起镇会师纪念碑</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 长征精神区域 -->
+  <section class="py-20 bg-gray-800">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-white mb-16 opacity-0" id="spirit-title">
+        长征精神永放光芒
+      </h2>
+      
+      <div class="max-w-4xl mx-auto text-center space-y-8 opacity-0" id="spirit-content">
+        <p class="text-xl text-gray-300 leading-relaxed">
+          吴起镇会师标志着中央红军长征的胜利结束，也标志着中国革命进入了一个新的阶段。长征精神成为了中华民族宝贵的精神财富。
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+          <div class="bg-gray-700 p-8 rounded-lg shadow-lg transform transition-all hover:scale-105">
+            <div class="text-red-500 text-4xl mb-4">
+              <i class="fas fa-flag-checkered"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-4">革命必胜</h3>
+            <p class="text-gray-300">
+              长征的胜利证明了中国共产党和红军具有战胜一切困难的勇气和力量，坚定了革命必胜的信念。
+            </p>
+          </div>
+          
+          <div class="bg-gray-700 p-8 rounded-lg shadow-lg transform transition-all hover:scale-105">
+            <div class="text-red-500 text-4xl mb-4">
+              <i class="fas fa-heart"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-4">民族团结</h3>
+            <p class="text-gray-300">
+              长征中，红军与各民族群众结下了深厚的情谊，促进了民族团结，为中国革命的胜利奠定了群众基础。
+            </p>
+          </div>
+          
+          <div class="bg-gray-700 p-8 rounded-lg shadow-lg transform transition-all hover:scale-105">
+            <div class="text-red-500 text-4xl mb-4">
+              <i class="fas fa-lightbulb"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-4">继往开来</h3>
+            <p class="text-gray-300">
+              长征精神激励着一代又一代中华儿女为了国家的繁荣富强而努力奋斗，成为了中华民族伟大复兴的强大动力。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 底部导航 -->
+  <section class="py-12 bg-gray-900 border-t border-gray-800">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <a href="grassland.html" class="flex items-center text-white hover:text-red-400 transition-colors mb-4 md:mb-0">
+          <i class="fas fa-arrow-left mr-2 text-2xl"></i>
+          <span class="text-xl">上一站：过草地</span>
+        </a>
+        
+        <a href="../pages/map.html" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-all transform hover:scale-105 mb-4 md:mb-0">
+          <i class="fas fa-map-marked-alt mr-2"></i> 返回地图
+        </a>
+        
+        <a href="../index.html" class="flex items-center text-white hover:text-red-400 transition-colors">
+          <span class="text-xl">返回首页</span>
+          <i class="fas fa-home ml-2 text-2xl"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 音频播放器 -->
+  <div class="audio-player" id="audio-player">
+    <div class="play-btn" id="audio-play-btn">
+      <i class="fas fa-play"></i>
+    </div>
+    <div class="progress">
+      <div class="progress-bar" id="audio-progress"></div>
+    </div>
+    <div class="time" id="audio-time">00:00 / 00:00</div>
+  </div>
+
+  <!-- 图片查看模态框 -->
+  <div class="modal" id="image-modal">
+    <span class="modal-close">&times;</span>
+    <div class="modal-content">
+      <img id="modal-img" src="" alt="大图预览">
+    </div>
+  </div>
+
+  <!-- 模式切换按钮 -->
+  <button id="mode-toggle" class="fixed bottom-8 right-8 bg-red-600 hover:bg-red-700 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg z-50 transition-all transform hover:scale-110">
+    <i class="fas fa-moon"></i>
+  </button>
+
+  <!-- JavaScript -->
+  <script src="../js/main.js"></script>
+  <script src="../js/mode-switch.js"></script>
+  <script>
+    // 音频播放器功能
+    let audio = null;
+    let isPlaying = false;
+    
+    // 初始化音频
+    function initAudio() {
+      // 检查音频文件是否存在
+      fetch('../assets/audio/wuqi.mp3', { method: 'HEAD' })
+        .then(response => {
+          if (response.ok) {
+            audio = new Audio('../assets/audio/wuqi.mp3');
+            audio.addEventListener('timeupdate', updateProgress);
+            audio.addEventListener('ended', onAudioEnded);
+            console.log('音频文件加载成功');
+          } else {
+            console.warn('音频文件不存在，使用备用音频');
+            // 使用备用音频文本
+            setupTextToSpeech();
+          }
+        })
+        .catch(error => {
+          console.warn('音频文件加载失败:', error);
+          // 使用备用音频文本
+          setupTextToSpeech();
+        });
+    }
+    
+    // 设置文本转语音
+    function setupTextToSpeech() {
+      console.log('使用文本转语音功能');
+      // 这里可以添加文本转语音的实现
+    }
+    
+    // 播放/暂停音频
+    function toggleAudio() {
+      if (!audio) {
+        alert('音频文件未找到，请检查网络连接或稍后再试');
+        return;
+      }
+      
+      if (isPlaying) {
+        audio.pause();
+        document.getElementById('audio-play-btn').innerHTML = '<i class="fas fa-play"></i>';
+        document.getElementById('play-audio-btn').innerHTML = '<i class="fas fa-volume-up mr-2"></i> 播放解说';
+      } else {
+        audio.play().catch(error => {
+          console.error('音频播放失败:', error);
+          alert('音频播放失败，请检查浏览器权限设置');
+        });
+        document.getElementById('audio-play-btn').innerHTML = '<i class="fas fa-pause"></i>';
+        document.getElementById('play-audio-btn').innerHTML = '<i class="fas fa-pause mr-2"></i> 暂停解说';
+        // 显示音频播放器
+        document.getElementById('audio-player').classList.add('visible');
+      }
+      
+      isPlaying = !isPlaying;
+    }
+    
+    // 更新进度条
+    function updateProgress() {
+      if (!audio) return;
+      
+      const progress = (audio.currentTime / audio.duration) * 100;
+      document.getElementById('audio-progress').style.width = `${progress}%`;
+      
+      // 更新时间显示
+      const currentTime = formatTime(audio.currentTime);
+      const duration = formatTime(audio.duration);
+      document.getElementById('audio-time').textContent = `${currentTime} / ${duration}`;
+    }
+    
+    // 音频播放结束
+    function onAudioEnded() {
+      isPlaying = false;
+      document.getElementById('audio-play-btn').innerHTML = '<i class="fas fa-play"></i>';
+      document.getElementById('play-audio-btn').innerHTML = '<i class="fas fa-volume-up mr-2"></i> 播放解说';
+      document.getElementById('audio-progress').style.width = '0%';
+    }
+    
+    // 格式化时间
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      seconds = Math.floor(seconds % 60);
+      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    // 图片查看器功能
+    function initImageViewer() {
+      const modal = document.getElementById('image-modal');
+      const modalImg = document.getElementById('modal-img');
+      const modalClose = document.querySelector('.modal-close');
+      const photoItems = document.querySelectorAll('.photo-item');
+      
+      // 打开模态框
+      photoItems.forEach(item => {
+        item.addEventListener('click', () => {
+          modal.classList.add('active');
+          modalImg.src = item.dataset.img;
+          document.body.style.overflow = 'hidden';
+        });
+      });
+      
+      // 关闭模态框
+      modalClose.addEventListener('click', () => {
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      });
+      
+      // 点击模态框背景关闭
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+          document.body.style.overflow = 'auto';
+        }
+      });
+    }
+    
+    // 初始化动画
+    function initAnimations() {
+      // 头部动画
+      gsap.to('#node-header-title', {
+        opacity: 1,
+        y: -20,
+        duration: 1,
+        delay: 0.2
+      });
+      
+      gsap.to('#node-header-date', {
+        opacity: 1,
+        y: -20,
+        duration: 1,
+        delay: 0.4
+      });
+      
+      gsap.to('#node-header-buttons', {
+        opacity: 1,
+        y: -20,
+        duration: 1,
+        delay: 0.6
+      });
+      
+      // 滚动触发动画
+      gsap.registerPlugin(ScrollTrigger);
+      
+      // 概述区域动画
+      gsap.to('#overview-title', {
+        scrollTrigger: {
+          trigger: '#overview',
+          start: 'top 80%'
+        },
+        opacity: 1,
+        y: -20,
+        duration: 1
+      });
+      
+      gsap.to('#overview-image', {
+        scrollTrigger: {
+          trigger: '#overview',
+          start: 'top 70%'
+        },
+        opacity: 1,
+        x: -50,
+        duration: 1,
+        delay: 0.2
+      });
+      
+      gsap.to('#overview-content', {
+        scrollTrigger: {
+          trigger: '#overview',
+          start: 'top 70%'
+        },
+        opacity: 1,
+        x: 50,
+        duration: 1,
+        delay: 0.4
+      });
+      
+      // 时间线区域动画
+      gsap.to('#timeline-title', {
+        scrollTrigger: {
+          trigger: '#timeline',
+          start: 'top 80%'
+        },
+        opacity: 1,
+        y: -20,
+        duration: 1
+      });
+      
+      gsap.to('#timeline-content .timeline-item', {
+        scrollTrigger: {
+          trigger: '#timeline',
+          start: 'top 70%'
+        },
+        opacity: 1,
+        x: 50,
+        duration: 1,
+        stagger: 0.2
+      });
+      
+      // 照片区域动画
+      gsap.to('#photos-title', {
+        scrollTrigger: {
+          trigger: '#photos',
+          start: 'top 80%'
+        },
+        opacity: 1,
+        y: -20,
+        duration: 1
+      });
+      
+      gsap.to('#photo-gallery .photo-item', {
+        scrollTrigger: {
+          trigger: '#photos',
+          start: 'top 70%'
+        },
+        opacity: 1,
+        y: 30,
+        duration: 1,
+        stagger: 0.1
+      });
+      
+      // 精神区域动画
+      gsap.to('#spirit-title', {
+        scrollTrigger: {
+          trigger: '#spirit',
+          start: 'top 80%'
+        },
+        opacity: 1,
+        y: -20,
+        duration: 1
+      });
+      
+      gsap.to('#spirit-content', {
+        scrollTrigger: {
+          trigger: '#spirit',
+          start: 'top 70%'
+        },
+        opacity: 1,
+        y: 30,
+        duration: 1,
+        delay: 0.2
+      });
+    }
+    
+    // 事件监听器
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化音频
+      initAudio();
+      
+      // 初始化图片查看器
+      initImageViewer();
+      
+      // 初始化动画
+      initAnimations();
+      
+      // 音频播放按钮点击事件
+      document.getElementById('play-audio-btn').addEventListener('click', toggleAudio);
+      document.getElementById('audio-play-btn').addEventListener('click', toggleAudio);
+      
+      // 导航栏滚动效果
+      window.addEventListener('scroll', function() {
+        const nav = document.getElementById('main-nav');
+        if (window.scrollY > 100) {
+          nav.classList.add('bg-gray-900', 'bg-opacity-95', 'shadow-lg');
+        } else {
+          nav.classList.remove('bg-gray-900', 'bg-opacity-95', 'shadow-lg');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
